@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/cloudfront-signer": "^3.523.0",
+    "dotenv": "^16.4.5"
+  }
 }
