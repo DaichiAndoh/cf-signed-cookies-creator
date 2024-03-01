@@ -1,37 +1,12 @@
-const { getSignedCookies } = require("@aws-sdk/cloudfront-signer");
-const fs = require('fs');
-require('dotenv').config();
+const cannedPolicyFn = require('./cannedPolicy.js');
+const customPolicyFn = require('./customPolicy.js');
 
-const cloudfrontDistributionDomain = process.env.CLOUD_FRONT_DISTRIBUTION_DOMAIN;
-const privateKey = fs.readFileSync('./keypair/private_key.pem');
-const keyPairId = process.env.KEY_PAIR_ID;
+const policyType = process.argv[2];
 
-// アクセス日中は有効にする
-const tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
-tomorrow.setHours(0, 0, 0, 0);
-const epochTime = Math.round(tomorrow.getTime() / 1000);
+if (!policyType) {
+  throw new Error('使用するポリシーを指定してください。');
+}
 
-/**
- * カスタムポリシー
- * 全てのコンテンツを署名付きCookieの対象とする
- */
-const policy = JSON.stringify({
-  Statement: [
-    {
-      Resource: `${cloudfrontDistributionDomain}/*`,
-      Condition: {
-        DateLessThan: {
-          "AWS:EpochTime": epochTime,
-        },
-      },
-    },
-  ],
-});
-
-const signedCookies = getSignedCookies({
-  privateKey,
-  keyPairId,
-  policy,
-});
-console.log(signedCookies);
+if (policyType === 'cannedPolicy') cannedPolicyFn();
+else if (policyType === 'customPolicy') customPolicyFn();
+else throw new Error('指定されたポリシーが不適切です。');
